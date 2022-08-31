@@ -1,0 +1,5 @@
+create_table("user_roles") {
+  t.Column("id", "integer", {primary: true})
+  t.Column("user_id", "integer", {})
+  t.Column("org_id", "integer", {})
+}

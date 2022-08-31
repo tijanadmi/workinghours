@@ -1,0 +1,7 @@
+create_table("emp_days_reservations") {
+  t.Column("id", "integer", {primary: true})
+  t.Column("start_date", "date", {})
+  t.Column("sift_id", "integer", {})
+  t.Column("emp_id", "integer", {})
+  t.Column("user_create_id", "integer", {})
+}

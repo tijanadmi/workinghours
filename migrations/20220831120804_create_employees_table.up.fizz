@@ -1,0 +1,15 @@
+create_table("employee") {
+  t.Column("id", "integer", {primary: true})
+  t.Column("code", "string", {"default": ""})
+  t.Column("first_name", "string", {"default": ""})
+  t.Column("last_name", "string", {"default": ""})
+  t.Column("workplace", "string", {"default": ""})
+  t.Column("org1_id", "integer", {})
+  t.Column("org2_id", "integer", {})
+  t.Column("org_unit1", "string", {"default": ""})
+  t.Column("org_unit2", "string", {})
+  t.Column("location", "string", {})
+  t.Column("address", "string", {})
+  t.Column("phone", "string", {})
+  t.Column("email", "string", {})
+}

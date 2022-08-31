@@ -1,0 +1,3 @@
+drop_foreign_key("emp_days_reservations", ""emp_days_reservations_employee_id_fk", {})
+drop_foreign_key("emp_days_reservations", ""emp_days_reservations_users_id_fk", {})
+drop_foreign_key("emp_days_reservations", ""emp_days_reservations_sift_id_fk", {})

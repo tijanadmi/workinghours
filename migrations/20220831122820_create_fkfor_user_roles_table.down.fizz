@@ -1,0 +1,2 @@
+drop_foreign_key("user_roles", "user_roles_org_units_id_fk", {})
+drop_foreign_key("user_roles", "user_roles_users_id_fk", {})
