@@ -4,7 +4,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Fort Smythe Bed and Breakfast</title>
+    <title>EMS AD</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
@@ -20,7 +20,7 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">&nbsp;</a>
         <button
@@ -38,37 +38,12 @@
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="/"
-                >Home</a
+                >Pocetna</a
               >
             </li>
+
             <li class="nav-item">
-              <a class="nav-link" href="/about">About</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                id="navbarDropdown"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                Rooms
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <li>
-                  <a class="dropdown-item" href="/generals-quarters">General's Quarters</a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="/majors-suite">Major's Suite</a>
-                </li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/search-availability">Book Now</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/contact">Contact</a>
+              <a class="nav-link" href="/contact">Kontakt</a>
             </li>
             <li class="nav-item">
             {{if eq .IsAuthenticated 1}}
@@ -79,7 +54,7 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li>
-                  <a class="dropdown-item" href="/admin/dashboard">Dashboard</a>
+                  <a class="dropdown-item" href="/admin/dashboard">Tabla</a>
                 </li>
                 <li>
                   <a class="dropdown-item" href="/user/logout">Logout</a>
@@ -100,26 +75,25 @@
     {{end}}
 
 
-
-
-<footer class="row my-footer">
+ <footer class="row my-footer">
       <div class="row">
         <div class="col text-center">
-          <strong>Fort Smythe Bed and Breakfast</strong><br>
-          100 Rocky Road<br>
-          Northbrook, Ontario<br>
-          Canada<br>
-          (416) 555-1212<br>
-          <a href="mailto:tijanadmi@yahoo.com">tijanadmi@yahoo.com</a>
+          <strong>EMS AD</strong><br>
+          Vojvode Stepe 412<br>
+          11 000 Beograd<br>
+          Srbija<br>
         </div>
 
         <div class="col"></div>
 
         <div class="col text-center">
-          <strong>Your home away<br>home</strong>
+          <strong>(+381) 64 840-8871<br>
+          <a href="mailto:tijana.dmitrovic@ems.rs">tijana.dmitrovic@ems.rs</a></strong>
         </div>
       </div>
     </footer>
+
+
 
     
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
@@ -132,8 +106,7 @@
     {{block "js" .}}
 
     {{end}}
-
-  <script>
+    <script>
 
   let attention = Prompt();
 (() => {
@@ -187,6 +160,9 @@ notify("{{.}}","warning")
 
  
   </script>
+
+
+ 
   </body>
 
   
