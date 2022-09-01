@@ -1,4 +1,4 @@
-create_table("sifts") {
+create_table("shifts") {
   t.Column("id", "integer", {primary: true})
   t.Column("code", "string",{"default": ""})
   t.Column("name", "string",{"default": ""})

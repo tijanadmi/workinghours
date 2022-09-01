@@ -1,1 +1,1 @@
-sql("drop table sifts")
+sql("drop table shifts")

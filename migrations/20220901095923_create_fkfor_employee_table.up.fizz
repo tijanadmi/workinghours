@@ -1,0 +1,11 @@
+add_foreign_key("employee", "org1_id", {"org_units": ["id"]}, {
+    "name": "employee_org_units_org1_id_fk",
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})
+
+add_foreign_key("employee", "org2_id", {"org_units": ["id"]}, {
+    "name": "employee_org_units_org2_id_fk",
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})
