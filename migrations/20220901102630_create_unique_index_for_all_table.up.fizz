@@ -1,0 +1,5 @@
+add_index("org_units", "code", {"unique": true})
+add_index("employee", "code", {"unique": true})
+add_index("shifts", "code", {"unique": true})
+add_index("user_roles", ["user_id","org_id"], {"unique": true})
+add_index("users", "email", {"unique": true})

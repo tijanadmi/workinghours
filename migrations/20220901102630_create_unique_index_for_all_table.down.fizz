@@ -1,0 +1,5 @@
+drop_index("users", "users_email_idx")
+drop_index("org_units", "org_units_code_idx")
+drop_index("employee", "employee_code_idx")
+drop_index("shifts", "shifts_code_idx")
+drop_index("user_roles", "user_roles_user_id_org_id_idx")
