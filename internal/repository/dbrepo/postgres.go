@@ -201,21 +201,21 @@ func (m *postgresDBRepo) DeleteBlockByID(id int) error {
 	return nil
 }
 
-
 // GetReservationForEmpByDate returns reservations for a emp and shift by date range
-func (m *postgresDBRepo) GetReservationForEmpByDate(shift_id int, emp_id int, start, end time.Time) ([]models.RoomRestriction, error) {
+func (m *postgresDBRepo) GetReservationForEmpByDate(shiftID int, empID int, start, end time.Time) ([]models.RoomRestriction, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	var restrictions []models.RoomRestriction
 
 	query := `
-		select id, coalesce(reservation_id, 0), restriction_id, room_id, start_date, end_date
-		from room_restrictions where $1 < end_date and $2 >= start_date
-		and room_id = $3
+		select id, start_date, shift_id,emp_id
+		from emp_days_restrictions where $3 <= start_date and $4 >= start_date
+		and shift_id = $1
+		and emp_id = $2
 `
 
-	rows, err := m.DB.QueryContext(ctx, query, start, end, roomID)
+	rows, err := m.DB.QueryContext(ctx, query, start, shiftID, empID)
 	if err != nil {
 		return nil, err
 	}
