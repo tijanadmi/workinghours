@@ -16,7 +16,7 @@ type User struct {
 	UpdatedAt   time.Time
 }
 
-// Room is the room model
+// ROOM is the room model
 type Room struct {
 	ID        int
 	RoomName  string
@@ -65,9 +65,9 @@ type RoomRestriction struct {
 
 //MailData holds an email message
 type MailData struct {
-	To      string
-	From    string
-	Subject string
-	Content string
+	To       string
+	From     string
+	Subject  string
+	Content  string
 	Template string
 }
