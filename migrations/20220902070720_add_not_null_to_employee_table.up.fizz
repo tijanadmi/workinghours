@@ -1,0 +1,5 @@
+change_column("employee", "workplace", "string", {"null": true})
+change_column("employee", "org2_id", "integer", {"null": true})
+change_column("employee", "location", "string", {"null": true})
+change_column("employee", "address", "string", {"null": true})
+change_column("employee", "phone", "string", {"null": true})

@@ -1,0 +1,1 @@
+add_column("user_roles", "role_type", "string", {"default": "CRUD"})
