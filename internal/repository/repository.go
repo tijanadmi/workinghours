@@ -10,9 +10,12 @@ type DatabaseRepo interface {
 	AllUsers() bool
 	GetUserByID(id int) (models.User, error)
 	UpdateUser(u models.User) error
-	Authenticate(email, testPassword string) (int, string, error)
+	//Authenticate(email, testPassword string) (int, string, error)
+	Authenticate(email, testPassword string) (int, string, []int, []int, error)
 
 	AllRooms() ([]models.Room, error)
+	GetEmployeeByOrgID(org_string string) ([]models.Employee, error)
+	GetReservationForEmpByDate(shiftID int, empID int, start, end time.Time) ([]models.EmpDaysReservation, error)
 	GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error)
 	InsertBlockForRoom(id int, startDate time.Time) error
 	DeleteBlockByID(id int) error

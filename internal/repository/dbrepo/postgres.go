@@ -21,7 +21,7 @@ func (m *postgresDBRepo) GetUserByID(id int) (models.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `select id, first_name, last_name, email, password, access_level, created_at, updated_at
+	query := `select id, first_name, last_name, email, password,  created_at, updated_at
 			from users where id = $1`
 
 	row := m.DB.QueryRowContext(ctx, query, id)
@@ -33,7 +33,6 @@ func (m *postgresDBRepo) GetUserByID(id int) (models.User, error) {
 		&u.LastName,
 		&u.Email,
 		&u.Password,
-		&u.AccessLevel,
 		&u.CreatedAt,
 		&u.UpdatedAt,
 	)
@@ -51,14 +50,13 @@ func (m *postgresDBRepo) UpdateUser(u models.User) error {
 	defer cancel()
 
 	query := `
-		update users set first_name = $1, last_name = $2, email = $3, access_level = $4, updated_at = $5
+		update users set first_name = $1, last_name = $2, email = $3,  updated_at = $5
 `
 
 	_, err := m.DB.ExecContext(ctx, query,
 		u.FirstName,
 		u.LastName,
 		u.Email,
-		u.AccessLevel,
 		time.Now(),
 	)
 
@@ -70,7 +68,7 @@ func (m *postgresDBRepo) UpdateUser(u models.User) error {
 }
 
 // Authenticate authenticates a user
-func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, []int, []int, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -80,19 +78,101 @@ func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, 
 	row := m.DB.QueryRowContext(ctx, "select id, password from users where email = $1", email)
 	err := row.Scan(&id, &hashedPassword)
 	if err != nil {
-		return id, "", err
+		return id, "", nil, nil, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(testPassword))
 	if err == bcrypt.ErrMismatchedHashAndPassword {
-		return 0, "", errors.New("incorrect password")
+		return 0, "", nil, nil, errors.New("incorrect password")
 	} else if err != nil {
-		return 0, "", err
+		return 0, "", nil, nil, err
 	}
 
-	return id, hashedPassword, nil
+	/********/
+	query := `select ur.id, ur.user_id,  o.id, o.code, o.name, ur.role_type
+	from user_roles ur
+	left join org_units o on o.id=ur.org_id 
+	where ur.user_id  = $1
+	`
+
+	var crudRole []int
+	var gleRole []int
+	rows, _ := m.DB.QueryContext(ctx, query, id)
+	defer rows.Close()
+
+	for rows.Next() {
+		var ur models.UserRole
+		err := rows.Scan(
+			&ur.ID,
+			&ur.UserID,
+			&ur.OrgID,
+			&ur.OrgUnit.Code,
+			&ur.OrgUnit.Name,
+			&ur.RoleType,
+		)
+
+		if err != nil {
+			return 0, "", nil, nil, err
+		}
+		if ur.RoleType == "CRUD" {
+			crudRole = append(crudRole, ur.OrgID)
+		} else {
+			gleRole = append(gleRole, ur.OrgID)
+		}
+
+	}
+	/********/
+
+	return id, hashedPassword, crudRole, gleRole, nil
 }
 
+func (m *postgresDBRepo) GetEmployeeByOrgID(org_string string) ([]models.Employee, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var employee []models.Employee
+
+	query := `select id, code, first_name, last_name, workplace, org1_id, coalesce(org2_id, 0), org_unit1,  location, address, phone, email, created_at, updated_at 
+			  from employee where org1_id in ($1) order by org1_id, first_name`
+
+	rows, err := m.DB.QueryContext(ctx, query, org_string)
+
+	if err != nil {
+		return employee, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var e models.Employee
+		err := rows.Scan(
+			&e.ID,
+			&e.Code,
+			&e.FirstName,
+			&e.LastName,
+			&e.Workplace,
+			&e.Org1ID,
+			&e.Org2ID,
+			&e.OrgUnit1,
+			&e.Location,
+			&e.Addtess,
+			&e.Phone,
+			&e.Email,
+			&e.CreatedAt,
+			&e.UpdatedAt,
+		)
+		if err != nil {
+			return employee, err
+		}
+		employee = append(employee, e)
+	}
+
+	if err = rows.Err(); err != nil {
+		return employee, err
+	}
+
+	return employee, nil
+
+}
 func (m *postgresDBRepo) AllRooms() ([]models.Room, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -202,17 +282,16 @@ func (m *postgresDBRepo) DeleteBlockByID(id int) error {
 }
 
 // GetReservationForEmpByDate returns reservations for a emp and shift by date range
-func (m *postgresDBRepo) GetReservationForEmpByDate(shiftID int, empID int, start, end time.Time) ([]models.RoomRestriction, error) {
+func (m *postgresDBRepo) GetReservationForEmpByDate(shiftID int, empID int, start, end time.Time) ([]models.EmpDaysReservation, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	var restrictions []models.RoomRestriction
-
+	var reservations []models.EmpDaysReservation
 	query := `
-		select id, start_date, shift_id,emp_id
-		from emp_days_restrictions where $3 <= start_date and $4 >= start_date
-		and shift_id = $1
-		and emp_id = $2
+		select id, start_date, shift_id,emp_id,user_create_id
+		from emp_days_reservations where $1 <= start_date and $1 >= start_date
+		and shift_id = $2
+		and emp_id = $3
 `
 
 	rows, err := m.DB.QueryContext(ctx, query, start, shiftID, empID)
@@ -222,26 +301,25 @@ func (m *postgresDBRepo) GetReservationForEmpByDate(shiftID int, empID int, star
 	defer rows.Close()
 
 	for rows.Next() {
-		var r models.RoomRestriction
+		var r models.EmpDaysReservation
 		err := rows.Scan(
 			&r.ID,
-			&r.ReservationID,
-			&r.RestrictionID,
-			&r.RoomID,
 			&r.StartDate,
-			&r.EndDate,
+			&r.ShiftID,
+			&r.EmpID,
+			&r.UserCreateID,
 		)
 		if err != nil {
 			return nil, err
 		}
-		restrictions = append(restrictions, r)
+		reservations = append(reservations, r)
 	}
 
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return restrictions, nil
+	return reservations, nil
 }
 
 // InsertReservationDayForEmp inserts reservation day for emp

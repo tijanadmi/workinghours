@@ -84,7 +84,7 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, _, err := m.DB.Authenticate(email, password)
+	id, _, crudRole, gleRole, err := m.DB.Authenticate(email, password)
 	if err != nil {
 		m.App.Session.Put(r.Context(), "error", "Neispravna šifra ili lozinka!")
 		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
@@ -92,6 +92,8 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "crudRole", crudRole)
+	m.App.Session.Put(r.Context(), "gleRole", gleRole)
 	m.App.Session.Put(r.Context(), "flash", "Uspešna prijava!")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
@@ -149,15 +151,16 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 	intMap := make(map[string]int)
 	intMap["days_in_month"] = lastOfMonth.Day()
 
-	rooms, err := m.DB.AllRooms()
+	fmt.Println("Pre poziva fje GetEmployeeByOrgID")
+	employee, err := m.DB.GetEmployeeByOrgID("11")
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
 	}
+	fmt.Println("Posle poziva fje GetEmployeeByOrgID")
+	data["employee"] = employee
 
-	data["rooms"] = rooms
-
-	for _, x := range rooms {
+	for _, x := range employee {
 		// create maps
 		reservationMap := make(map[string]int)
 		blockMap := make(map[string]int)
@@ -168,26 +171,18 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 		}
 
 		// get all the restrictions for the current room
-		restrictions, err := m.DB.GetRestrictionsForRoomByDate(x.ID, firstOfMonth, lastOfMonth)
+		reservations, err := m.DB.GetReservationForEmpByDate(x.ID, 1, firstOfMonth, lastOfMonth)
 		if err != nil {
 			helpers.ServerError(w, err)
 			return
 		}
 
-		for _, y := range restrictions {
-			if y.ReservationID > 0 {
-				// it's a reservation
-				for d := y.StartDate; !d.After(y.EndDate); d = d.AddDate(0, 0, 1) {
-					reservationMap[d.Format("2006-01-2")] = y.ReservationID
-					fmt.Printf("ROOM_ID=%d, Reservation value=%d For day=%s ", x.ID, reservationMap[d.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-					fmt.Println()
-				}
-			} else {
-				// it's a block
-				blockMap[y.StartDate.Format("2006-01-2")] = y.ID
-				fmt.Printf("ROOM_ID=%d, Blocked value=%d For day=%s ", x.ID, blockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-				fmt.Println()
-			}
+		for _, y := range reservations {
+
+			// it's a block
+			blockMap[y.StartDate.Format("2006-01-2")] = y.ID
+			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, blockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
+			fmt.Println()
 
 		}
 		data[fmt.Sprintf("reservation_map_%d", x.ID)] = reservationMap

@@ -6,14 +6,71 @@ import (
 
 // User is the user model
 type User struct {
-	ID          int
-	FirstName   string
-	LastName    string
-	Email       string
-	Password    string
-	AccessLevel int
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID        int
+	FirstName string
+	LastName  string
+	Email     string
+	Password  string
+	UserRole  []UserRole
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type UserRole struct {
+	ID        int
+	UserID    int
+	OrgID     int
+	OrgUnit   OrgUnit
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	RoleType  string
+}
+
+type OrgUnit struct {
+	ID        int
+	Code      string
+	Name      string
+	OrgID     int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Shift struct {
+	ID        int
+	Code      string
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type Employee struct {
+	ID        int
+	Code      string
+	FirstName string
+	LastName  string
+	Workplace string
+	Org1ID    int
+	Org2ID    int
+	OrgUnit1  string
+	OrgUnit2  string
+	Location  string
+	Addtess   string
+	Phone     string
+	Email     string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type EmpDaysReservation struct {
+	ID           int
+	StartDate    time.Time
+	ShiftID      int
+	EmpID        int
+	UserCreateID int
+	Shift        Shift
+	Employee     Employee
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 // ROOM is the room model
