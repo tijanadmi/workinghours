@@ -54,7 +54,7 @@ type Employee struct {
 	OrgUnit1  string
 	OrgUnit2  string
 	Location  string
-	Addtess   string
+	Address   string
 	Phone     string
 	Email     string
 	CreatedAt time.Time

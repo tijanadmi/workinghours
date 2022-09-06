@@ -151,44 +151,69 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 	intMap := make(map[string]int)
 	intMap["days_in_month"] = lastOfMonth.Day()
 
-	fmt.Println("Pre poziva fje GetEmployeeByOrgID")
 	employee, err := m.DB.GetEmployeeByOrgID("11")
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
 	}
-	fmt.Println("Posle poziva fje GetEmployeeByOrgID")
+
 	data["employee"] = employee
 
 	for _, x := range employee {
 		// create maps
 		reservationMap := make(map[string]int)
 		blockMap := make(map[string]int)
+		dayblockMap := make(map[string]int)
+		nightblockMap := make(map[string]int)
 
 		for d := firstOfMonth; !d.After(lastOfMonth); d = d.AddDate(0, 0, 1) {
 			reservationMap[d.Format("2006-01-2")] = 0
 			blockMap[d.Format("2006-01-2")] = 0
+			dayblockMap[d.Format("2006-01-2")] = 0
+			nightblockMap[d.Format("2006-01-2")] = 0
 		}
 
-		// get all the restrictions for the current room
-		reservations, err := m.DB.GetReservationForEmpByDate(x.ID, 1, firstOfMonth, lastOfMonth)
+		// get all the reservations for the current employee for day shift
+		reservationsDay, err := m.DB.GetReservationForEmpByDate(x.ID, 1, firstOfMonth, lastOfMonth)
 		if err != nil {
 			helpers.ServerError(w, err)
 			return
 		}
 
-		for _, y := range reservations {
+		for _, y := range reservationsDay {
 
 			// it's a block
 			blockMap[y.StartDate.Format("2006-01-2")] = y.ID
-			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, blockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
+			dayblockMap[y.StartDate.Format("2006-01-2")] = y.ID
+			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, dayblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
+			fmt.Println()
+
+		}
+
+		// get all the reservations for the current employee for day shift
+		reservationsNight, err := m.DB.GetReservationForEmpByDate(x.ID, 2, firstOfMonth, lastOfMonth)
+		if err != nil {
+			helpers.ServerError(w, err)
+			return
+		}
+
+		for _, y := range reservationsNight {
+
+			// it's a block
+			
+			nightblockMap[y.StartDate.Format("2006-01-2")] = y.ID
+			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, nightblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
 			fmt.Println()
 
 		}
 		data[fmt.Sprintf("reservation_map_%d", x.ID)] = reservationMap
 		data[fmt.Sprintf("block_map_%d", x.ID)] = blockMap
+		data[fmt.Sprintf("day_block_map_%d", x.ID)] = dayblockMap
+		data[fmt.Sprintf("night_block_map_%d", x.ID)] = nightblockMap
 
 		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap)
+		m.App.Session.Put(r.Context(), fmt.Sprintf("day_block_map_%d", x.ID), dayblockMap)
+		m.App.Session.Put(r.Context(), fmt.Sprintf("night_block_map_%d", x.ID), nightblockMap)
 	}
 
 	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{
@@ -210,7 +235,7 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 	month, _ := strconv.Atoi(r.Form.Get("m"))
 
 	// process blocks
-	rooms, err := m.DB.AllRooms()
+	employee, err := m.DB.GetEmployeeByOrgID("11")
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -218,11 +243,11 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 
 	form := forms.New(r.PostForm)
 
-	for _, x := range rooms {
+	for _, x := range employee {
 		// Get the block map from the session. Loop through entire map, if we have an entry in the map
 		// that does not exist in our posted data, and if the restriction id > 0, then it is a block we need to
 		// remove.
-		curMap := m.App.Session.Get(r.Context(), fmt.Sprintf("block_map_%d", x.ID)).(map[string]int)
+		curMap := m.App.Session.Get(r.Context(), fmt.Sprintf("day_block_map_%d", x.ID)).(map[string]int)
 		for name, value := range curMap {
 			// ok will be false if the value is not in the map
 			if val, ok := curMap[name]; ok {
@@ -231,7 +256,7 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 				if val > 0 {
 					if !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, name), r) {
 						// delete the restriction by id
-						err := m.DB.DeleteBlockByID(value)
+						err := m.DB.DeleteEmpDayByID(value)
 						if err != nil {
 							log.Println(err)
 						}

@@ -154,7 +154,7 @@ func (m *postgresDBRepo) GetEmployeeByOrgID(org_string string) ([]models.Employe
 			&e.Org2ID,
 			&e.OrgUnit1,
 			&e.Location,
-			&e.Addtess,
+			&e.Address,
 			&e.Phone,
 			&e.Email,
 			&e.CreatedAt,
