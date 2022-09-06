@@ -289,12 +289,12 @@ func (m *postgresDBRepo) GetReservationForEmpByDate(shiftID int, empID int, star
 	var reservations []models.EmpDaysReservation
 	query := `
 		select id, start_date, shift_id,emp_id,user_create_id
-		from emp_days_reservations where $1 <= start_date and $1 >= start_date
-		and shift_id = $2
-		and emp_id = $3
+		from emp_days_reservations where $3 <= start_date and $4 >= start_date
+		and shift_id = $1
+		and emp_id = $2
 `
 
-	rows, err := m.DB.QueryContext(ctx, query, start, shiftID, empID)
+	rows, err := m.DB.QueryContext(ctx, query, shiftID, empID, start, end)
 	if err != nil {
 		return nil, err
 	}

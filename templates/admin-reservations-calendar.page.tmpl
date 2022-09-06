@@ -59,7 +59,7 @@
                                 <input 
                                     {{if gt (index $dayblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0 }}
                                                     checked
-                                                    name="remove_block_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
+                                                    name="remove_dayblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
                                                     value="{{index $dayblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))}}"
                                                 {{else}}
                                                     name="add_dayblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
@@ -79,7 +79,7 @@
                                 <input 
                                     {{if gt (index $nightblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0 }}
                                                     checked
-                                                    name="remove_block_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
+                                                    name="remove_nightblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
                                                     value="{{index $nightblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))}}"
                                                 {{else}}
                                                     name="add_nightblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
@@ -97,7 +97,7 @@
 
         <hr>
 
-            <input type="submit" class="btn btn-primary" value="Save Changes">
+            <input type="submit" class="btn btn-primary" value="Sačuvaj">
 
     </form>
 

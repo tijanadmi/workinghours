@@ -151,7 +151,7 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 	intMap := make(map[string]int)
 	intMap["days_in_month"] = lastOfMonth.Day()
 
-	employee, err := m.DB.GetEmployeeByOrgID("11")
+	employee, err := m.DB.GetEmployeeByOrgID("1")
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -174,7 +174,7 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 		}
 
 		// get all the reservations for the current employee for day shift
-		reservationsDay, err := m.DB.GetReservationForEmpByDate(x.ID, 1, firstOfMonth, lastOfMonth)
+		reservationsDay, err := m.DB.GetReservationForEmpByDate(1, x.ID, firstOfMonth, lastOfMonth)
 		if err != nil {
 			helpers.ServerError(w, err)
 			return
@@ -191,7 +191,7 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 		}
 
 		// get all the reservations for the current employee for day shift
-		reservationsNight, err := m.DB.GetReservationForEmpByDate(x.ID, 2, firstOfMonth, lastOfMonth)
+		reservationsNight, err := m.DB.GetReservationForEmpByDate(2, x.ID, firstOfMonth, lastOfMonth)
 		if err != nil {
 			helpers.ServerError(w, err)
 			return
@@ -235,7 +235,7 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 	month, _ := strconv.Atoi(r.Form.Get("m"))
 
 	// process blocks
-	employee, err := m.DB.GetEmployeeByOrgID("11")
+	employee, err := m.DB.GetEmployeeByOrgID("1")
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -254,7 +254,30 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 				// only pay attention to values > 0, and that are not in the form post
 				// the rest are just placeholders for days without blocks
 				if val > 0 {
-					if !form.Has(fmt.Sprintf("remove_block_%d_%s", x.ID, name), r) {
+					if !form.Has(fmt.Sprintf("remove_dayblock_%d_%s", x.ID, name), r) {
+						// delete the restriction by id
+						err := m.DB.DeleteEmpDayByID(value)
+						if err != nil {
+							log.Println(err)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for _, x := range employee {
+		// Get the block map from the session. Loop through entire map, if we have an entry in the map
+		// that does not exist in our posted data, and if the restriction id > 0, then it is a block we need to
+		// remove.
+		curMap := m.App.Session.Get(r.Context(), fmt.Sprintf("night_block_map_%d", x.ID)).(map[string]int)
+		for name, value := range curMap {
+			// ok will be false if the value is not in the map
+			if val, ok := curMap[name]; ok {
+				// only pay attention to values > 0, and that are not in the form post
+				// the rest are just placeholders for days without blocks
+				if val > 0 {
+					if !form.Has(fmt.Sprintf("remove_nightblock_%d_%s", x.ID, name), r) {
 						// delete the restriction by id
 						err := m.DB.DeleteEmpDayByID(value)
 						if err != nil {
@@ -268,18 +291,32 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 
 	// now handle new blocks
 	for name, _ := range r.PostForm {
-		if strings.HasPrefix(name, "add_block") {
+		if strings.HasPrefix(name, "add_dayblock") {
 			exploded := strings.Split(name, "_")
-			roomID, _ := strconv.Atoi(exploded[2])
+			employeeID, _ := strconv.Atoi(exploded[2])
 			t, _ := time.Parse("2006-01-2", exploded[3])
 			// insert a new block
-			err := m.DB.InsertBlockForRoom(roomID, t)
+			err := m.DB.InsertReservationDayForEmp(1, employeeID, 1, t)
 			if err != nil {
 				log.Println(err)
 			}
 		}
 	}
 
-	m.App.Session.Put(r.Context(), "flash", "Changes saved")
+	// now handle new blocks
+	for name, _ := range r.PostForm {
+		if strings.HasPrefix(name, "add_nightblock") {
+			exploded := strings.Split(name, "_")
+			employeeID, _ := strconv.Atoi(exploded[2])
+			t, _ := time.Parse("2006-01-2", exploded[3])
+			// insert a new block
+			err := m.DB.InsertReservationDayForEmp(2, employeeID, 1, t)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+	}
+
+	m.App.Session.Put(r.Context(), "flash", "Izmene su sačuvane!")
 	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar?y=%d&m=%d", year, month), http.StatusSeeOther)
 }
