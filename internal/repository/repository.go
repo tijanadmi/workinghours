@@ -14,7 +14,7 @@ type DatabaseRepo interface {
 	Authenticate(email, testPassword string) (int, string, []int, []int, error)
 
 	AllRooms() ([]models.Room, error)
-	GetEmployeeByOrgID(org_string string) ([]models.Employee, error)
+	GetEmployeeByOrgID(user_id int) ([]models.Employee, error)
 	GetReservationForEmpByDate(shiftID int, empID int, start, end time.Time) ([]models.EmpDaysReservation, error)
 	GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error)
 	InsertBlockForRoom(id int, startDate time.Time) error

@@ -30,3 +30,13 @@ func IsAuthenticated(r *http.Request) bool {
 	exists := app.Session.Exists(r.Context(), "user_id")
 	return exists
 }
+
+func IsCRUDRole(r *http.Request) bool {
+	exists := app.Session.Exists(r.Context(), "crudRole")
+	return exists
+}
+
+func IsGLERole(r *http.Request) bool {
+	exists := app.Session.Exists(r.Context(), "gleRole")
+	return exists
+}

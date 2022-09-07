@@ -126,16 +126,16 @@ func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, 
 	return id, hashedPassword, crudRole, gleRole, nil
 }
 
-func (m *postgresDBRepo) GetEmployeeByOrgID(org_string string) ([]models.Employee, error) {
+func (m *postgresDBRepo) GetEmployeeByOrgID(user_id int) ([]models.Employee, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	var employee []models.Employee
 
 	query := `select id, code, first_name, last_name, workplace, org1_id, coalesce(org2_id, 0), org_unit1,  location, address, phone, email, created_at, updated_at 
-			  from employee where org1_id in ($1) order by org1_id, first_name`
+			  from employee where org1_id in (select org_id from user_roles where user_id=$1)  order by org1_id, first_name`
 
-	rows, err := m.DB.QueryContext(ctx, query, org_string)
+	rows, err := m.DB.QueryContext(ctx, query, user_id)
 
 	if err != nil {
 		return employee, err
@@ -327,9 +327,9 @@ func (m *postgresDBRepo) InsertReservationDayForEmp(shift_id int, emp_id int, us
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := `insert into emp_days_reservations (start_date, shift_id,emp_id,user_create_id,
+	query := `insert into emp_days_reservations (start_date, shift_id, emp_id, user_create_id,
 			created_at, updated_at) values ($1, $2, $3, $4, $5, $6)`
-
+	log.Println(shift_id)
 	_, err := m.DB.ExecContext(ctx, query, startDate, shift_id, emp_id, user_create_id, time.Now(), time.Now())
 	if err != nil {
 		log.Println(err)

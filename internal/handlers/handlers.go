@@ -92,8 +92,12 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	m.App.Session.Put(r.Context(), "user_id", id)
-	m.App.Session.Put(r.Context(), "crudRole", crudRole)
-	m.App.Session.Put(r.Context(), "gleRole", gleRole)
+	if crudRole != nil {
+		m.App.Session.Put(r.Context(), "crudRole", crudRole)
+	}
+	if gleRole != nil {
+		m.App.Session.Put(r.Context(), "gleRole", gleRole)
+	}
 	m.App.Session.Put(r.Context(), "flash", "Uspešna prijava!")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 
@@ -151,7 +155,17 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 	intMap := make(map[string]int)
 	intMap["days_in_month"] = lastOfMonth.Day()
 
-	employee, err := m.DB.GetEmployeeByOrgID("1")
+	/***** Get from Session Begin****/
+	user_id, ok := m.App.Session.Get(r.Context(), "user_id").(int)
+	if !ok {
+		//log.Println("cannot get item from session")
+		m.App.ErrorLog.Println("Can't get  user_id from session")
+		m.App.Session.Put(r.Context(), "error", "Can't get   from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	/***** Get from Session End****/
+	employee, err := m.DB.GetEmployeeByOrgID(user_id)
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -200,7 +214,7 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 		for _, y := range reservationsNight {
 
 			// it's a block
-			
+
 			nightblockMap[y.StartDate.Format("2006-01-2")] = y.ID
 			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, nightblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
 			fmt.Println()
@@ -234,8 +248,18 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 	year, _ := strconv.Atoi(r.Form.Get("y"))
 	month, _ := strconv.Atoi(r.Form.Get("m"))
 
+	/***** Get from Session Begin****/
+	user_id, ok := m.App.Session.Get(r.Context(), "user_id").(int)
+	if !ok {
+		//log.Println("cannot get item from session")
+		m.App.ErrorLog.Println("Can't get  user_id from session")
+		m.App.Session.Put(r.Context(), "error", "Can't get   from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	/***** Get from Session End****/
 	// process blocks
-	employee, err := m.DB.GetEmployeeByOrgID("1")
+	employee, err := m.DB.GetEmployeeByOrgID(user_id)
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -296,7 +320,7 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 			employeeID, _ := strconv.Atoi(exploded[2])
 			t, _ := time.Parse("2006-01-2", exploded[3])
 			// insert a new block
-			err := m.DB.InsertReservationDayForEmp(1, employeeID, 1, t)
+			err := m.DB.InsertReservationDayForEmp(1, employeeID, user_id, t)
 			if err != nil {
 				log.Println(err)
 			}
@@ -310,7 +334,7 @@ func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *htt
 			employeeID, _ := strconv.Atoi(exploded[2])
 			t, _ := time.Parse("2006-01-2", exploded[3])
 			// insert a new block
-			err := m.DB.InsertReservationDayForEmp(2, employeeID, 1, t)
+			err := m.DB.InsertReservationDayForEmp(2, employeeID, user_id, t)
 			if err != nil {
 				log.Println(err)
 			}
