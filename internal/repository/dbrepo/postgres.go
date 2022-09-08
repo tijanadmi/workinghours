@@ -126,14 +126,14 @@ func (m *postgresDBRepo) Authenticate(email, testPassword string) (int, string, 
 	return id, hashedPassword, crudRole, gleRole, nil
 }
 
-func (m *postgresDBRepo) GetEmployeeByOrgID(user_id int) ([]models.Employee, error) {
+func (m *postgresDBRepo) GetEmployeeByUserIDCRUD(user_id int) ([]models.Employee, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	var employee []models.Employee
 
 	query := `select id, code, first_name, last_name, workplace, org1_id, coalesce(org2_id, 0), org_unit1,  location, address, phone, email, created_at, updated_at 
-			  from employee where org1_id in (select org_id from user_roles where user_id=$1)  order by org1_id, first_name`
+			  from employee where org1_id in (select org_id from user_roles where user_id=$1 and role_type='CRUD')  order by org1_id, first_name`
 
 	rows, err := m.DB.QueryContext(ctx, query, user_id)
 
@@ -173,6 +173,94 @@ func (m *postgresDBRepo) GetEmployeeByOrgID(user_id int) ([]models.Employee, err
 	return employee, nil
 
 }
+
+func (m *postgresDBRepo) GetEmployeeByUserIDGLE(user_id int) ([]models.Employee, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var employee []models.Employee
+
+	query := `select id, code, first_name, last_name, workplace, org1_id, coalesce(org2_id, 0), org_unit1,  location, address, phone, email, created_at, updated_at 
+			  from employee where org1_id in (select org_id from user_roles where user_id=$1 and role_type='GLE')  order by org1_id, first_name`
+
+	rows, err := m.DB.QueryContext(ctx, query, user_id)
+
+	if err != nil {
+		return employee, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var e models.Employee
+		err := rows.Scan(
+			&e.ID,
+			&e.Code,
+			&e.FirstName,
+			&e.LastName,
+			&e.Workplace,
+			&e.Org1ID,
+			&e.Org2ID,
+			&e.OrgUnit1,
+			&e.Location,
+			&e.Address,
+			&e.Phone,
+			&e.Email,
+			&e.CreatedAt,
+			&e.UpdatedAt,
+		)
+		if err != nil {
+			return employee, err
+		}
+		employee = append(employee, e)
+	}
+
+	if err = rows.Err(); err != nil {
+		return employee, err
+	}
+
+	return employee, nil
+
+}
+
+func (m *postgresDBRepo) GetOrgUnitsByUserIDGLE(user_id int) ([]models.OrgUnit, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var orgUnits []models.OrgUnit
+
+	query := `select id, code, name, created_at, updated_at 
+			  from org_units where id in (select org_id from user_roles where user_id=$1 and role_type='GLE')  order by code`
+
+	rows, err := m.DB.QueryContext(ctx, query, user_id)
+
+	if err != nil {
+		return orgUnits, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var e models.OrgUnit
+		err := rows.Scan(
+			&e.ID,
+			&e.Code,
+			&e.Name,
+			&e.CreatedAt,
+			&e.UpdatedAt,
+		)
+		if err != nil {
+			return orgUnits, err
+		}
+		orgUnits = append(orgUnits, e)
+	}
+
+	if err = rows.Err(); err != nil {
+		return orgUnits, err
+	}
+
+	return orgUnits, nil
+
+}
+
 func (m *postgresDBRepo) AllRooms() ([]models.Room, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

@@ -55,7 +55,13 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li>
-                  <a class="dropdown-item" href="/admin/dashboard">Tabla</a>
+                  {{if eq .IsGLE 1}}
+                    <a class="dropdown-item" href="/admin/dashboard">Tabla</a>
+                  {{else}}
+                    {{if eq .IsCRUD 1}}
+                      <a class="dropdown-item" href="/admin/reservations-calendar">Tabla</a>
+                    {{end}}
+                   {{end}}
                 </li>
                 <li>
                   <a class="dropdown-item" href="/user/logout">Odjava</a>

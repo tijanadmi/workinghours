@@ -57,25 +57,29 @@
                  <a class="nav-link" href="/user/logout">Odjava</a>
              </li>
 		</ul>
-      </div>
+
     </nav>
     <!-- partial -->
     <div class="container-fluid page-body-wrapper">
       <!-- partial:partials/_sidebar.html -->
       <nav class="sidebar sidebar-offcanvas" id="sidebar">
         <ul class="nav">
+        {{if eq .IsGLE 1}}
           <li class="nav-item">
-            <a class="nav-link" href="/admin/dashboard">
+            <a class="nav-link" href="/admin/show-calendar">
               <i class="ti-shield menu-icon"></i>
               <span class="menu-title">Evidencija radnih časova</span>
             </a>
           </li>
+          {{end}}
+          {{if eq .IsCRUD 1}}
           <li class="nav-item">
             <a class="nav-link" href="/admin/reservations-calendar">
               <i class="ti-layout-list-post menu-icon"></i>
               <span class="menu-title">Planiranje rada</span>
             </a>
           </li>
+          {{end}}
           
         </ul>
       </nav>

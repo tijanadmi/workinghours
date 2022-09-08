@@ -64,19 +64,15 @@
                      </td>
                         {{range $index := iterate $dim}}
                                 <td class="text-center">
-                                <input 
                                     {{if gt (index $dayblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0 }}
-                                                    checked
-                                                    name="remove_dayblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
-                                                    value="{{index $dayblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))}}"
+                                                    <span class="text-danger">R</span>
                                                 {{else}}
-                                                    name="add_dayblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
-                                                    value="1"
+                                                    <span class="text-danger">_</span>
                                                 {{end}}
-                                                type="checkbox">
-                                 {{end}}
+                                                
+                                 
                                 </td>
-                        
+                        {{end}}
                      </tr>
                      <tr>
                      <td class="text-center">
@@ -84,28 +80,23 @@
                      </td>
                         {{range $index := iterate $dim}}
                                 <td class="text-center">
-                                <input 
+                               
                                     {{if gt (index $nightblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0 }}
-                                                    checked
-                                                    name="remove_nightblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
-                                                    value="{{index $nightblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))}}"
-                                                {{else}}
-                                                    name="add_nightblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
-                                                    value="1"
-                                                {{end}}
-                                                type="checkbox">
-                                 {{end}}
+                                            <span class="text-danger">R</span>       
+                                    {{else}}
+                                            <span class="text-danger">_</span>
+                                    {{end}}
+                                              
+                                
                                 </td>
-                        
+                         {{end}}
                      </tr>
 
                 </table>
             </div>
         {{end}}
 
-        <hr>
-
-            <input type="submit" class="btn btn-primary" value="Sačuvaj">
+        
 
     </form>
 
