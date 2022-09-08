@@ -15,28 +15,29 @@
 {{$curYear := index .StringMap "this_month_year"}}
      <div class="position-static">
     <div class="col-md-12">
-        <div class="text-center">
-                    <h3>{{formatDate $now "January"}} {{formatDate $now "2006"}}</h3>
-                </div>
-
-                <div class="float-start">
-                    <a class="btn btn-sm btn-outline-secondary"
-                    href="/admin/reservations-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}">&lt;&lt;</a>
-                </div>
-
-                <div class="float-end">
-                    <a class="btn btn-sm btn-outline-secondary"
-                    href="/admin/reservations-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}">&gt;&gt;</a>
-                </div>
-                <div class="text-center">
+    <div class="text-center">
                     <div id="divInnerCombo">
-		                <select  id ="InnerCombo"> 
+		                <select   class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id ="InnerCombo" onChange="refreshPage()"> 
 			                {{range $orgUnitsList}}
 			                    <option value="{{.ID}}">{{.Name}}</option>
 			                {{end}}
 		                <select>
 	                </div>	
                 </div>
+        <div class="text-center">
+                    <h3>{{formatDate $now "January"}} {{formatDate $now "2006"}}</h3>
+                </div>
+
+                <div class="float-start">
+                    <a class="btn btn-sm btn-outline-secondary"
+                    href="/admin/show-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}">&lt;&lt;</a>
+                </div>
+
+                <div class="float-end">
+                    <a class="btn btn-sm btn-outline-secondary"
+                    href="/admin/show-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}">&gt;&gt;</a>
+                </div>
+                
     </div>
     </div>
     
@@ -44,7 +45,7 @@
        
         <div class="clearfix"></div>
 
-        <form method="post" action="/admin/reservations-calendar">
+        <form method="post" action="/admin/show-calendar">
             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
             <input type="hidden" name="m" value="{{index .StringMap "this_month"}}">
             <input type="hidden" name="y" value="{{index .StringMap "this_month_year"}}">
@@ -111,5 +112,17 @@
     </form>
 
     </div>
+<script type="text/javascript">
+			function refreshPage() {
+				var select = document.getElementById('InnerCombo');
+                console.log(select);
+				var option = select.options[select.selectedIndex];
+                console.log(option);
+                window.location = "/admin/show-calendar"; 
+				console.log(option.value);
+            console.log(option.text);
+			}
 
+			
+		</script>
 {{end}}
