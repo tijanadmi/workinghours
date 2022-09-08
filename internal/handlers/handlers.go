@@ -461,6 +461,18 @@ func (m *Repository) AdminShowDashboardCalendar(w http.ResponseWriter, r *http.R
 		m.App.Session.Put(r.Context(), fmt.Sprintf("night_block_map_%d", x.ID), nightblockMap)
 	}
 
+	/**** get OrgUnits for the list Begin***/
+
+	orgUnitsList, err := m.DB.GetOrgUnitsByUserIDGLE(user_id)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	data["orgUnitsList"] = orgUnitsList
+
+	/**** get OrgUnits for the list End***/
+
 	render.Template(w, r, "admin-show-reservations-calendar.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
 		Data:      data,

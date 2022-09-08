@@ -9,6 +9,7 @@
 {{define "content"}}
 {{$now := index .Data "now"}}
 {{$employee := index .Data "employee"}}
+{{$orgUnitsList := index .Data "orgUnitsList"}}
 {{$dim := index .IntMap "days_in_month"}}
 {{$curMonth := index .StringMap "this_month"}}
 {{$curYear := index .StringMap "this_month_year"}}
@@ -26,6 +27,15 @@
                 <div class="float-end">
                     <a class="btn btn-sm btn-outline-secondary"
                     href="/admin/reservations-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}">&gt;&gt;</a>
+                </div>
+                <div class="text-center">
+                    <div id="divInnerCombo">
+		                <select  id ="InnerCombo"> 
+			                {{range $orgUnitsList}}
+			                    <option value="{{.ID}}">{{.Name}}</option>
+			                {{end}}
+		                <select>
+	                </div>	
                 </div>
     </div>
     </div>
