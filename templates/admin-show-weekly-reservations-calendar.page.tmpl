@@ -1,0 +1,137 @@
+{{template "admin" .}}
+
+
+
+{{define "page-title"}}
+
+{{end}}
+
+{{define "content"}}
+{{$now := index .Data "now"}}
+{{$employee := index .Data "employee"}}
+{{$orgUnitsList := index .Data "orgUnitsList"}}
+{{$dim := index .IntMap "days_in_month"}}
+{{$curMonth := index .StringMap "this_month"}}
+{{$curYear := index .StringMap "this_month_year"}}
+{{$org_id := index .StringMap "org_id"}}
+     <div class="position-static">
+    <div class="col-md-12">
+    <div class="text-center">
+                    <div id="divInnerCombo">
+		                <select   class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id ="InnerCombo" onChange="refreshPage()"> 
+			                {{range $orgUnitsList}}
+                                
+                                <option {{if eq (printf "%d" .ID) (printf "%s" (index $org_id)) }}
+                                    selected="selected"
+                                    {{end}}
+                                    
+                                value="{{.ID }}">
+                                {{.Name}}</option>
+                            {{end}}
+			               
+		                <select>
+	                </div>	
+                </div>
+        <div class="text-center">
+                    <h3>{{formatDate $now "January"}} {{formatDate $now "2006"}}</h3>
+                </div>
+
+                <div class="float-start">
+                    <a class="btn btn-sm btn-outline-secondary"
+                    href="/admin/show-calendar-weekly?o={{index .StringMap "org_id"}}&y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}">&lt;&lt;</a>
+                </div>
+
+                <div class="float-end">
+                    <a class="btn btn-sm btn-outline-secondary"
+                    href="/admin/show-calendar-weekly?o={{index .StringMap "org_id"}}&y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}">&gt;&gt;</a>
+                </div>
+                
+    </div>
+    </div>
+    
+    <div class="col-md-12">
+       
+        <div class="clearfix"></div>
+
+        <form method="post" action="/admin/show-calendar">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <input type="hidden" name="m" value="{{index .StringMap "this_month"}}">
+            <input type="hidden" name="y" value="{{index .StringMap "this_month_year"}}">
+        <div class="table-response">
+                <table class="table table-bordered table-sm">
+
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                     <td class="text-center">Nedelja</td>
+                     <td class="text-center">Ponedeljak</td>
+                     <td class="text-center">Utorak</td>
+                     <td class="text-center">Sreda</td>
+                     <td class="text-center">Četvrtak</td>
+                     <td class="text-center">Petak</td>
+                     <td class="text-center">Subota</td>
+                     </tr>
+
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate 7}}
+                            
+                                <td class="text-center">
+                                    {{add $index 1}}
+                                </td>
+                            {{end}}
+                     </tr>
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate 7}}
+                            
+                                <td class="text-center">
+                                    {{add $index 1}}
+                                </td>
+                            {{end}}
+                     </tr>
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate 7}}
+                            
+                                <td class="text-center">
+                                    {{add $index 1}}
+                                </td>
+                            {{end}}
+                     </tr>
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate 7}}
+                            
+                                <td class="text-center">
+                                    {{add $index 1}}
+                                </td>
+                            {{end}}
+                     </tr>
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate 7}}
+                            
+                                <td class="text-center">
+                                    {{add $index 1}}
+                                </td>
+                            {{end}}
+                     </tr>
+                </table>
+            </div>
+    </form>
+
+    </div>
+<script type="text/javascript">
+			function refreshPage() {
+				var select = document.getElementById('InnerCombo');
+                console.log(select);
+				var option = select.options[select.selectedIndex];
+                console.log(option);
+                window.location = "/admin/show-calendar-weekly?o=" + option.value; 
+				console.log(option.value);
+            console.log(option.text);
+			}
+
+			
+		</script>
+{{end}}

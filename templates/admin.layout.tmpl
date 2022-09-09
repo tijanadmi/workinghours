@@ -28,6 +28,9 @@
             .notie-container {
                 z-index: 50000;
             }
+            .table_calendar {
+              color:#f00;
+            }
         </style>
         {{block "css" . }}
 
@@ -68,7 +71,13 @@
           <li class="nav-item">
             <a class="nav-link" href="/admin/show-calendar">
               <i class="ti-shield menu-icon"></i>
-              <span class="menu-title">Evidencija radnih časova</span>
+              <span class="menu-title">Pregled radnih časova</span>
+            </a>
+          </li>
+           <li class="nav-item">
+            <a class="nav-link" href="/admin/show-calendar-weekly">
+              <i class="ti-shield menu-icon"></i>
+              <span class="menu-title">Kalendar radnih časova</span>
             </a>
           </li>
           {{end}}
