@@ -222,7 +222,7 @@ func (m *postgresDBRepo) GetEmployeeByUserIDGLE(user_id int) ([]models.Employee,
 
 }
 
-func (m *postgresDBRepo) GetEmployeeByOrgID(user_id int) ([]models.Employee, error) {
+func (m *postgresDBRepo) GetEmployeeByOrgID(org_id int) ([]models.Employee, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -231,7 +231,7 @@ func (m *postgresDBRepo) GetEmployeeByOrgID(user_id int) ([]models.Employee, err
 	query := `select id, code, first_name, last_name, workplace, org1_id, coalesce(org2_id, 0), org_unit1,  location, address, phone, email, created_at, updated_at 
 			  from employee where org1_id =$1  order by org1_id, first_name`
 
-	rows, err := m.DB.QueryContext(ctx, query, user_id)
+	rows, err := m.DB.QueryContext(ctx, query, org_id)
 
 	if err != nil {
 		return employee, err

@@ -13,14 +13,22 @@
 {{$dim := index .IntMap "days_in_month"}}
 {{$curMonth := index .StringMap "this_month"}}
 {{$curYear := index .StringMap "this_month_year"}}
+{{$org_id := index .StringMap "org_id"}}
      <div class="position-static">
     <div class="col-md-12">
     <div class="text-center">
                     <div id="divInnerCombo">
 		                <select   class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id ="InnerCombo" onChange="refreshPage()"> 
 			                {{range $orgUnitsList}}
-			                    <option value="{{.ID}}">{{.Name}}</option>
-			                {{end}}
+                                
+                                <option {{if eq (printf "%d" .ID) (printf "%s" (index $org_id)) }}
+                                    selected="selected"
+                                    {{end}}
+                                    
+                                value="{{.ID }}">
+                                {{.Name}}</option>
+                            {{end}}
+			               
 		                <select>
 	                </div>	
                 </div>
@@ -30,12 +38,12 @@
 
                 <div class="float-start">
                     <a class="btn btn-sm btn-outline-secondary"
-                    href="/admin/show-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}">&lt;&lt;</a>
+                    href="/admin/show-calendar?o={{index .StringMap "org_id"}}&y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}">&lt;&lt;</a>
                 </div>
 
                 <div class="float-end">
                     <a class="btn btn-sm btn-outline-secondary"
-                    href="/admin/show-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}">&gt;&gt;</a>
+                    href="/admin/show-calendar?o={{index .StringMap "org_id"}}&y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}">&gt;&gt;</a>
                 </div>
                 
     </div>
@@ -118,7 +126,7 @@
                 console.log(select);
 				var option = select.options[select.selectedIndex];
                 console.log(option);
-                window.location = "/admin/show-calendar"; 
+                window.location = "/admin/show-calendar?o=" + option.value; 
 				console.log(option.value);
             console.log(option.text);
 			}

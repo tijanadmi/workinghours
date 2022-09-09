@@ -356,9 +356,36 @@ func (m *Repository) AdminShowDashboardCalendar(w http.ResponseWriter, r *http.R
 		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC) //variable that contains year, month, 1-any day in that month, 0-hour, 0-minute, 0-second, 0-nanosecond, time.UTC - location
 	}
 
+	/***** Get from Session Begin****/
+	user_id, ok := m.App.Session.Get(r.Context(), "user_id").(int)
+	if !ok {
+		//log.Println("cannot get item from session")
+		m.App.ErrorLog.Println("Can't get  user_id from session")
+		m.App.Session.Put(r.Context(), "error", "Can't get   from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	/***** Get from Session End****/
+
+	/**** get OrgUnits for the list Begin***/
+
+	orgUnitsList, err := m.DB.GetOrgUnitsByUserIDGLE(user_id)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	/**** get OrgUnits for the list End***/
+	var org_id int
+	if r.URL.Query().Get("o") != "" {
+		org_id, _ = strconv.Atoi(r.URL.Query().Get("o"))
+	} else {
+		org_id = orgUnitsList[0].ID
+	}
+
 	data := make(map[string]interface{})
 	data["now"] = now
-
+	data["orgUnitsList"] = orgUnitsList
 	next := now.AddDate(0, 1, 0) // 0-number of years we wont to add, 1-number of months we wont to add, 0-number of days we wont to add
 	last := now.AddDate(0, -1, 0)
 
@@ -369,6 +396,7 @@ func (m *Repository) AdminShowDashboardCalendar(w http.ResponseWriter, r *http.R
 	lastMonthYear := last.Format("2006")
 
 	stringMap := make(map[string]string)
+	stringMap["org_id"] = strconv.Itoa(org_id)
 	stringMap["next_month"] = nextMonth
 	stringMap["next_month_year"] = nextMonthYear
 	stringMap["last_month"] = lastMonth
@@ -386,17 +414,7 @@ func (m *Repository) AdminShowDashboardCalendar(w http.ResponseWriter, r *http.R
 	intMap := make(map[string]int)
 	intMap["days_in_month"] = lastOfMonth.Day()
 
-	/***** Get from Session Begin****/
-	user_id, ok := m.App.Session.Get(r.Context(), "user_id").(int)
-	if !ok {
-		//log.Println("cannot get item from session")
-		m.App.ErrorLog.Println("Can't get  user_id from session")
-		m.App.Session.Put(r.Context(), "error", "Can't get   from session")
-		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
-		return
-	}
-	/***** Get from Session End****/
-	employee, err := m.DB.GetEmployeeByUserIDGLE(user_id)
+	employee, err := m.DB.GetEmployeeByOrgID(org_id)
 	if err != nil {
 		helpers.ServerError(w, err)
 		return
@@ -460,18 +478,6 @@ func (m *Repository) AdminShowDashboardCalendar(w http.ResponseWriter, r *http.R
 		m.App.Session.Put(r.Context(), fmt.Sprintf("day_block_map_%d", x.ID), dayblockMap)
 		m.App.Session.Put(r.Context(), fmt.Sprintf("night_block_map_%d", x.ID), nightblockMap)
 	}
-
-	/**** get OrgUnits for the list Begin***/
-
-	orgUnitsList, err := m.DB.GetOrgUnitsByUserIDGLE(user_id)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	data["orgUnitsList"] = orgUnitsList
-
-	/**** get OrgUnits for the list End***/
 
 	render.Template(w, r, "admin-show-reservations-calendar.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
