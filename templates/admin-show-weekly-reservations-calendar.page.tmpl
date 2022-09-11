@@ -11,6 +11,7 @@
 {{$employee := index .Data "employee"}}
 {{$orgUnitsList := index .Data "orgUnitsList"}}
 {{$dim := index .IntMap "days_in_month"}}
+{{$w := index .IntMap "weekday"}}
 {{$curMonth := index .StringMap "this_month"}}
 {{$curYear := index .StringMap "this_month_year"}}
 {{$org_id := index .StringMap "org_id"}}
@@ -60,6 +61,7 @@
         <div class="table-response">
                 <table class="table table-bordered table-sm">
 
+                     
                      <tr class="table-active">
                      <td class="text-center"></td>
                      <td class="text-center">Nedelja</td>
@@ -73,49 +75,69 @@
 
                      <tr class="table-active">
                      <td class="text-center"></td>
-                            {{range $index := iterate 7}}
-                            
-                                <td class="text-center">
-                                    {{add $index 1}}
-                                </td>
+                            {{range $index := iterate2  0 7}}
+                                {{if lt $index $w }}
+                                    <td class="text-center"></td>
+                                {{else}}
+                                    <td class="text-center">{{add (minus $index $w) 1 }}</td>
+                                {{end}}
+                            {{end}}
+                     </tr>
+
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate2  (minus 8 $w) (minus 15 $w)}}
+                                
+                                    <td class="text-center">{{$index }}</td>
+
+                            {{end}}
+                     </tr>
+
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate2  (minus 15 $w) (minus 22 $w)}}
+
+                                    <td class="text-center">{{$index }} </td>
+
+                            {{end}}
+                     </tr>
+
+                     <tr class="table-active">
+                     <td class="text-center"></td>
+                            {{range $index := iterate2  (minus 22 $w) (minus 29 $w)}}
+
+                                    <td class="text-center">{{$index }} </td>
+
                             {{end}}
                      </tr>
                      <tr class="table-active">
                      <td class="text-center"></td>
-                            {{range $index := iterate 7}}
-                            
-                                <td class="text-center">
-                                    {{add $index 1}}
-                                </td>
+                            {{range $index := iterate2  (minus 29 $w) (minus 36 $w)}}
+
+                              {{if gt $index   $dim }}
+                                    <td class="text-center"></td>
+                                {{else}}
+                                    <td class="text-center">{{$index }}</td>
+                                {{end}}
                             {{end}}
                      </tr>
-                     <tr class="table-active">
-                     <td class="text-center"></td>
-                            {{range $index := iterate 7}}
-                            
-                                <td class="text-center">
-                                    {{add $index 1}}
-                                </td>
-                            {{end}}
-                     </tr>
-                     <tr class="table-active">
-                     <td class="text-center"></td>
-                            {{range $index := iterate 7}}
-                            
-                                <td class="text-center">
-                                    {{add $index 1}}
-                                </td>
-                            {{end}}
-                     </tr>
-                     <tr class="table-active">
-                     <td class="text-center"></td>
-                            {{range $index := iterate 7}}
-                            
-                                <td class="text-center">
-                                    {{add $index 1}}
-                                </td>
-                            {{end}}
-                     </tr>
+
+                     {{if le (minus 36 $w)   $dim }}
+
+                        <tr class="table-active">
+                            <td class="text-center"></td>
+                                    {{range $index := iterate2  (minus 36 $w) (minus 43 $w)}}
+
+                                    {{if gt $index   $dim }}
+                                            <td class="text-center"></td>
+                                        {{else}}
+                                            <td class="text-center">{{$index }}</td>
+                                        {{end}}
+                                    {{end}}
+                            </tr>
+                    {{end}}
+                     
+                     
                 </table>
             </div>
     </form>

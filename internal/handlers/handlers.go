@@ -496,7 +496,10 @@ func (m *Repository) AdminShowWeeklyDashboardCalendar(w http.ResponseWriter, r *
 		month, _ := strconv.Atoi(r.URL.Query().Get("m"))
 		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC) //variable that contains year, month, 1-any day in that month, 0-hour, 0-minute, 0-second, 0-nanosecond, time.UTC - location
 	}
-
+	now.AddDate(0, 0, -now.Day() + 1)
+	weekday := int(now.AddDate(0, 0, -now.Day() + 1).Weekday())
+	fmt.Println(weekday)      // "Tuesday"
+	
 	/***** Get from Session Begin****/
 	user_id, ok := m.App.Session.Get(r.Context(), "user_id").(int)
 	if !ok {
@@ -554,6 +557,7 @@ func (m *Repository) AdminShowWeeklyDashboardCalendar(w http.ResponseWriter, r *
 
 	intMap := make(map[string]int)
 	intMap["days_in_month"] = lastOfMonth.Day()
+	intMap["weekday"] = weekday
 
 	employee, err := m.DB.GetEmployeeByOrgID(org_id)
 	if err != nil {
@@ -589,8 +593,8 @@ func (m *Repository) AdminShowWeeklyDashboardCalendar(w http.ResponseWriter, r *
 			// it's a block
 			blockMap[y.StartDate.Format("2006-01-2")] = y.ID
 			dayblockMap[y.StartDate.Format("2006-01-2")] = y.ID
-			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, dayblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-			fmt.Println()
+			//fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, dayblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
+			//fmt.Println()
 
 		}
 
@@ -606,8 +610,8 @@ func (m *Repository) AdminShowWeeklyDashboardCalendar(w http.ResponseWriter, r *
 			// it's a block
 
 			nightblockMap[y.StartDate.Format("2006-01-2")] = y.ID
-			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, nightblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-			fmt.Println()
+			//fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, nightblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
+			//fmt.Println()
 
 		}
 		data[fmt.Sprintf("reservation_map_%d", x.ID)] = reservationMap

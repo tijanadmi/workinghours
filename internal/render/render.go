@@ -18,7 +18,9 @@ var functions = template.FuncMap{
 	"humanDate":  HumanDate,
 	"formatDate": FormatDate,
 	"iterate":    Iterate,
+	"iterate2":    Iterate2,
 	"add":        Add,
+	"minus": Minus,
 }
 
 var app *config.AppConfig
@@ -27,11 +29,25 @@ func Add(a, b int) int {
 	return a + b
 }
 
+func Minus(a, b int) int {
+	return a - b
+}
+
 // Iterate returns a slice of ints, starting at 1, going to count
 func Iterate(count int) []int {
 	var i int
 	var items []int
 	for i = 0; i < count; i++ {
+		items = append(items, i)
+	}
+	return items
+}
+
+// Iterate returns a slice of ints, starting at a, going to count
+func Iterate2(a,count int) []int {
+	var i int
+	var items []int
+	for i = a; i < count; i++ {
 		items = append(items, i)
 	}
 	return items
