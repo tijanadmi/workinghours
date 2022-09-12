@@ -496,10 +496,10 @@ func (m *Repository) AdminShowWeeklyDashboardCalendar(w http.ResponseWriter, r *
 		month, _ := strconv.Atoi(r.URL.Query().Get("m"))
 		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC) //variable that contains year, month, 1-any day in that month, 0-hour, 0-minute, 0-second, 0-nanosecond, time.UTC - location
 	}
-	now.AddDate(0, 0, -now.Day() + 1)
-	weekday := int(now.AddDate(0, 0, -now.Day() + 1).Weekday())
-	fmt.Println(weekday)      // "Tuesday"
-	
+	now.AddDate(0, 0, -now.Day()+1)
+	weekday := int(now.AddDate(0, 0, -now.Day()+1).Weekday())
+	fmt.Println(weekday) // "Tuesday"
+
 	/***** Get from Session Begin****/
 	user_id, ok := m.App.Session.Get(r.Context(), "user_id").(int)
 	if !ok {
@@ -559,69 +559,22 @@ func (m *Repository) AdminShowWeeklyDashboardCalendar(w http.ResponseWriter, r *
 	intMap["days_in_month"] = lastOfMonth.Day()
 	intMap["weekday"] = weekday
 
-	employee, err := m.DB.GetEmployeeByOrgID(org_id)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
-
-	data["employee"] = employee
-
-	for _, x := range employee {
-		// create maps
-		reservationMap := make(map[string]int)
-		blockMap := make(map[string]int)
-		dayblockMap := make(map[string]int)
-		nightblockMap := make(map[string]int)
-
-		for d := firstOfMonth; !d.After(lastOfMonth); d = d.AddDate(0, 0, 1) {
-			reservationMap[d.Format("2006-01-2")] = 0
-			blockMap[d.Format("2006-01-2")] = 0
-			dayblockMap[d.Format("2006-01-2")] = 0
-			nightblockMap[d.Format("2006-01-2")] = 0
-		}
-
-		// get all the reservations for the current employee for day shift
-		reservationsDay, err := m.DB.GetReservationForEmpByDate(1, x.ID, firstOfMonth, lastOfMonth)
+	for d := firstOfMonth; !d.After(lastOfMonth); d = d.AddDate(0, 0, 1) {
+		employee, err := m.DB.GetReservationEmployeeByDate(1, org_id, d)
 		if err != nil {
 			helpers.ServerError(w, err)
 			return
 		}
 
-		for _, y := range reservationsDay {
+		data[fmt.Sprintf("day_block_map_%d", d.Day())] = employee
 
-			// it's a block
-			blockMap[y.StartDate.Format("2006-01-2")] = y.ID
-			dayblockMap[y.StartDate.Format("2006-01-2")] = y.ID
-			//fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, dayblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-			//fmt.Println()
-
-		}
-
-		// get all the reservations for the current employee for day shift
-		reservationsNight, err := m.DB.GetReservationForEmpByDate(2, x.ID, firstOfMonth, lastOfMonth)
+		employee, err = m.DB.GetReservationEmployeeByDate(2, org_id, d)
 		if err != nil {
 			helpers.ServerError(w, err)
 			return
 		}
 
-		for _, y := range reservationsNight {
-
-			// it's a block
-
-			nightblockMap[y.StartDate.Format("2006-01-2")] = y.ID
-			//fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, nightblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-			//fmt.Println()
-
-		}
-		data[fmt.Sprintf("reservation_map_%d", x.ID)] = reservationMap
-		data[fmt.Sprintf("block_map_%d", x.ID)] = blockMap
-		data[fmt.Sprintf("day_block_map_%d", x.ID)] = dayblockMap
-		data[fmt.Sprintf("night_block_map_%d", x.ID)] = nightblockMap
-
-		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap)
-		m.App.Session.Put(r.Context(), fmt.Sprintf("day_block_map_%d", x.ID), dayblockMap)
-		m.App.Session.Put(r.Context(), fmt.Sprintf("night_block_map_%d", x.ID), nightblockMap)
+		data[fmt.Sprintf("night_block_map_%d", d.Day())] = employee
 	}
 
 	render.Template(w, r, "admin-show-weekly-reservations-calendar.page.tmpl", &models.TemplateData{

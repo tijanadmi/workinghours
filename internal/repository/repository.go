@@ -17,6 +17,7 @@ type DatabaseRepo interface {
 	GetEmployeeByUserIDCRUD(user_id int) ([]models.Employee, error)
 	GetEmployeeByUserIDGLE(user_id int) ([]models.Employee, error)
 	GetEmployeeByOrgID(org_id int) ([]models.Employee, error)
+	GetReservationEmployeeByDate(shiftID, org_id int, start time.Time) ([]models.Employee, error)
 	GetOrgUnitsByUserIDGLE(user_id int) ([]models.OrgUnit, error)
 	GetReservationForEmpByDate(shiftID int, empID int, start, end time.Time) ([]models.EmpDaysReservation, error)
 	GetRestrictionsForRoomByDate(roomID int, start, end time.Time) ([]models.RoomRestriction, error)

@@ -418,6 +418,44 @@ func (m *postgresDBRepo) DeleteBlockByID(id int) error {
 }
 
 // GetReservationForEmpByDate returns reservations for a emp and shift by date range
+func (m *postgresDBRepo) GetReservationEmployeeByDate(shiftID, org_id int, start time.Time) ([]models.Employee, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var employee []models.Employee
+	query := `
+		select coalesce(id, 0), first_name
+		from employee 
+		where org1_id = $1
+		and id in (select emp_id from emp_days_reservations where  start_date = $2 and shift_id = $3)
+`
+
+	rows, err := m.DB.QueryContext(ctx, query, org_id, start, shiftID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var e models.Employee
+		err := rows.Scan(
+			&e.ID,
+			&e.FirstName,
+		)
+		if err != nil {
+			return nil, err
+		}
+		employee = append(employee, e)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return employee, nil
+}
+
+// GetReservationForEmpByDate returns reservations for a emp and shift by date range
 func (m *postgresDBRepo) GetReservationForEmpByDate(shiftID int, empID int, start, end time.Time) ([]models.EmpDaysReservation, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

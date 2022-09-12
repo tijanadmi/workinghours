@@ -8,7 +8,7 @@
 
 {{define "content"}}
 {{$now := index .Data "now"}}
-{{$employee := index .Data "employee"}}
+
 {{$orgUnitsList := index .Data "orgUnitsList"}}
 {{$dim := index .IntMap "days_in_month"}}
 {{$w := index .IntMap "weekday"}}
@@ -80,6 +80,29 @@
                                     <td class="text-center"></td>
                                 {{else}}
                                     <td class="text-center">{{add (minus $index $w) 1 }}</td>
+                                {{end}}
+                            {{end}}
+                     </tr>
+                     <tr class="table-active">
+                     <td class="text-center">Dnevna</td>
+                            {{range $index := iterate2  0 7}}
+                                {{if lt $index $w }}
+                                    <td class="text-center"></td>
+                                {{else}}
+                                    <td class="text-center">{{range $employee := index .Data  (printf "day_block_map_%d" (add (minus $index $w) 1)) }}
+                                                                {{.FirstName}}</br>
+                                                            {{end}}
+                                    </td>
+                                {{end}}
+                            {{end}}
+                     </tr>
+                     <tr class="table-active">
+                     <td class="text-center">Noćna</td>
+                            {{range $index := iterate2  0 7}}
+                                {{if lt $index $w }}
+                                    <td class="text-center"></td>
+                                {{else}}
+                                    <td class="text-center"></td>
                                 {{end}}
                             {{end}}
                      </tr>
