@@ -89,7 +89,8 @@
                                 {{if lt $index $w }}
                                     <td class="text-center"></td>
                                 {{else}}
-                                    <td class="text-center">{{range $employee := index .Data  (printf "day_block_map_%d" (add (minus $index $w) 1)) }}
+                                    <td class="text-center">{{$employee := index $.Data (printf "day_block_map_%d" (add (minus $index $w) 1))}}
+                                    {{range $employee }}
                                                                 {{.FirstName}}</br>
                                                             {{end}}
                                     </td>
