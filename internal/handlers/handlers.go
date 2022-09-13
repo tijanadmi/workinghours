@@ -566,14 +566,34 @@ func (m *Repository) AdminShowWeeklyDashboardCalendar(w http.ResponseWriter, r *
 			return
 		}
 
+		var e string
+		for _, value := range employee {
+			if e != "" {
+				e = e + ", " + value.FirstName
+			} else {
+				e = value.FirstName
+			}
+		}
+
 		data[fmt.Sprintf("day_block_map_%d", d.Day())] = employee
+		stringMap[fmt.Sprintf("day_block_map_%d", d.Day())] = e
+		//fmt.Println(fmt.Sprintf("day_block_map_%d", d.Day()))
+		//fmt.Println(stringMap[fmt.Sprintf("day_block_map_%d", d.Day())])
 
 		employee, err = m.DB.GetReservationEmployeeByDate(2, org_id, d)
 		if err != nil {
 			helpers.ServerError(w, err)
 			return
 		}
-
+		e = ""
+		for _, value := range employee {
+			if e != "" {
+				e = e + ", " + value.FirstName
+			} else {
+				e = value.FirstName
+			}
+		}
+		stringMap[fmt.Sprintf("night_block_map_%d", d.Day())] = e
 		data[fmt.Sprintf("night_block_map_%d", d.Day())] = employee
 	}
 
