@@ -1,0 +1,1 @@
+sql("drop table working_day_types")

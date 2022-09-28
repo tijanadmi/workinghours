@@ -1,0 +1,1 @@
+delete from working_day_types;

@@ -1,6 +1,6 @@
 .idea
 database.yml
-bookings
+workinghours
 run.sh
 run.bat
 Insert.txt

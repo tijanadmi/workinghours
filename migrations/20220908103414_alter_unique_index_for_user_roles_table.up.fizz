@@ -1,2 +1,1 @@
-drop_index("user_roles", "user_roles_user_id_org_id_idx")
 add_index("user_roles", ["user_id","org_id", "role_type"], {"unique": true})

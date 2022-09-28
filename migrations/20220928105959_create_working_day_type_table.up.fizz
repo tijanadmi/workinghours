@@ -1,0 +1,5 @@
+create_table("working_day_types") {
+  t.Column("id", "integer", {primary: true})
+  t.Column("code", "string",{"default": ""})
+  t.Column("name", "string",{"default": ""})
+}

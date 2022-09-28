@@ -1,0 +1,4 @@
+add_foreign_key("emp_days_reservations", "wd_type_id", {"working_day_types": ["id"]}, {
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})

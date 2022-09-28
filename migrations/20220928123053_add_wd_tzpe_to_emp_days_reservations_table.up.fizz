@@ -1,0 +1,1 @@
+add_column("emp_days_reservations", "wd_type_id", "integer", {"null": true})
