@@ -629,10 +629,12 @@ func (m *postgresDBRepo) InsertReservationDayTypeForEmp(wd_type_id int, emp_id i
 	} else {
 		shift_id = 1
 	}
+	if wd_type_id != 20 {
 	_, err = m.DB.ExecContext(ctx, query2, startDate, shift_id, emp_id, user_create_id, time.Now(), time.Now(), wd_type_id)
 	if err != nil {
 		log.Println(err)
 		return err
+	}
 	}
 	return nil
 }
