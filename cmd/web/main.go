@@ -32,11 +32,6 @@ func main() {
 	}
 	defer db.SQL.Close()
 
-	
-
-	
-
-	
 	fmt.Println(fmt.Sprintf("Staring application on port %s", portNumber))
 
 	srv := &http.Server{
@@ -57,6 +52,7 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
 	gob.Register(map[string]int{})
+	gob.Register(map[string]string{})
 
 	// read flags
 	inProduction := flag.Bool("production", true, "Application is in production")
@@ -74,8 +70,6 @@ func run() (*driver.DB, error) {
 		fmt.Println("Missing required flags")
 		os.Exit(1)
 	}
-
-	
 
 	// change this to true when in production
 	app.InProduction = *inProduction
@@ -121,4 +115,3 @@ func run() (*driver.DB, error) {
 
 	return db, nil
 }
-

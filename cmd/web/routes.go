@@ -34,6 +34,8 @@ func routes(app *config.AppConfig) http.Handler {
 		mux.Get("/reservations-calendar", handlers.Repo.AdminReservationsCalendar)
 		mux.Post("/reservations-calendar", handlers.Repo.AdminPostReservationsCalendar)
 
+		mux.Get("/reservations-calendar-day-type", handlers.Repo.AdminReservationsCalendarByDayType)
+
 		mux.Get("/show-calendar", handlers.Repo.AdminShowDashboardCalendar)
 		mux.Get("/show-calendar-weekly", handlers.Repo.AdminShowWeeklyDashboardCalendar)
 

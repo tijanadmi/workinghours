@@ -309,6 +309,45 @@ func (m *postgresDBRepo) GetOrgUnitsByUserIDGLE(user_id int) ([]models.OrgUnit, 
 
 }
 
+func (m *postgresDBRepo) GetWorkingDayTypes() ([]models.WorkingDayType, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var workingDayTypes []models.WorkingDayType
+
+	query := `select id, code, name, created_at, updated_at 
+			  from working_day_types order by code`
+
+	rows, err := m.DB.QueryContext(ctx, query)
+
+	if err != nil {
+		return workingDayTypes, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var e models.WorkingDayType
+		err := rows.Scan(
+			&e.ID,
+			&e.Code,
+			&e.Name,
+			&e.CreatedAt,
+			&e.UpdatedAt,
+		)
+		if err != nil {
+			return workingDayTypes, err
+		}
+		workingDayTypes = append(workingDayTypes, e)
+	}
+
+	if err = rows.Err(); err != nil {
+		return workingDayTypes, err
+	}
+
+	return workingDayTypes, nil
+
+}
+
 func (m *postgresDBRepo) AllRooms() ([]models.Room, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -520,6 +559,77 @@ func (m *postgresDBRepo) DeleteEmpDayByID(id int) error {
 	query := `delete from emp_days_reservations where id = $1`
 
 	_, err := m.DB.ExecContext(ctx, query, id)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}
+
+// GetReservationForEmpByDate returns reservations for a emp and shift by date range
+func (m *postgresDBRepo) GetReservationTypeForEmpByDate(empID int, start, end time.Time) ([]models.EmpDaysReservation, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var reservations []models.EmpDaysReservation
+	query := `
+		select r.id, r.start_date, r.shift_id,r.emp_id,r.user_create_id,r.wd_type_id,t.code, t.name
+		from emp_days_reservations r, working_day_types t where $2 <= r.start_date and $3 >= r.start_date
+		and  r.emp_id = $1 and r.wd_type_id=t.id
+`
+
+	rows, err := m.DB.QueryContext(ctx, query, empID, start, end)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var r models.EmpDaysReservation
+		err := rows.Scan(
+			&r.ID,
+			&r.StartDate,
+			&r.ShiftID,
+			&r.EmpID,
+			&r.UserCreateID,
+			&r.WdTypeId,
+			&r.WorkingDayType.Code,
+			&r.WorkingDayType.Name,
+		)
+		if err != nil {
+			return nil, err
+		}
+		reservations = append(reservations, r)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return reservations, nil
+}
+
+func (m *postgresDBRepo) InsertReservationDayTypeForEmp(wd_type_id int, emp_id int, user_create_id int, startDate time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	query := `delete from emp_days_reservations where wd_type_id = $1 and emp_id = $2 and startDate = $3`
+
+	_, err := m.DB.ExecContext(ctx, query, wd_type_id, emp_id, startDate)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	query2 := `insert into emp_days_reservations (start_date, shift_id, emp_id, user_create_id,
+			created_at, updated_at, wd_type_id) values ($1, $2, $3, $4, $5, $6, $7)`
+	log.Println(wd_type_id)
+
+	var shift_id int
+	if wd_type_id == 2 {
+		shift_id = 2
+	} else {
+		shift_id = 1
+	}
+	_, err = m.DB.ExecContext(ctx, query2, startDate, shift_id, emp_id, user_create_id, time.Now(), time.Now(), wd_type_id)
 	if err != nil {
 		log.Println(err)
 		return err

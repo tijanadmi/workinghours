@@ -59,8 +59,8 @@
             <input type="hidden" name="y" value="{{index .StringMap "this_month_year"}}">
         {{range $employee}}
             {{$employeeID := .ID}}
-            {{$dayblocks := index $.Data (printf "day_block_map_%d" .ID)}}
-            {{$nightblocks := index $.Data (printf "night_block_map_%d" .ID)}}
+            {{$dayblocks := index $.Data (printf "day_type_block_map_%d" .ID)}}
+            
             {{$reservations := index $.Data (printf "reservation_map_%d" .ID)}}
 
             <h4 class="mt-4">{{.FirstName}} - {{.Workplace}} ({{.Address}}, {{.Phone}})</h4>
@@ -69,8 +69,7 @@
                 <table class="table table-bordered table-sm">
 
                      <tr class="table-active">
-                     <td class="text-center">
-                     </td>
+
                             {{range $index := iterate $dim}}
                                 <td class="text-center">
                                     {{add $index 1}}
@@ -78,13 +77,10 @@
                             {{end}}
                      </tr>
                      <tr>
-                     <td class="text-center">
-                     Dnevna
-                     </td>
                         {{range $index := iterate $dim}}
                                 <td class="text-center">
-                                    {{if gt (index $dayblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0 }}
-                                                    <span class="text-danger">R</span>
+                                    {{if ne (index $dayblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) "" }}
+                                                    <span class="text-danger">{{index $dayblocks ((printf "%s-%s-%d" $curYear $curMonth (add $index 1)))}}</span>
                                                 {{else}}
                                                     <span class="text-danger">_</span>
                                                 {{end}}
@@ -93,23 +89,7 @@
                                 </td>
                         {{end}}
                      </tr>
-                     <tr>
-                     <td class="text-center">
-                     Noćna
-                     </td>
-                        {{range $index := iterate $dim}}
-                                <td class="text-center">
-                               
-                                    {{if gt (index $nightblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0 }}
-                                            <span class="text-danger">R</span>       
-                                    {{else}}
-                                            <span class="text-danger">_</span>
-                                    {{end}}
-                                              
-                                
-                                </td>
-                         {{end}}
-                     </tr>
+                    
 
                 </table>
             </div>

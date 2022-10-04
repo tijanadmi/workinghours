@@ -62,15 +62,25 @@ type Employee struct {
 }
 
 type EmpDaysReservation struct {
-	ID           int
-	StartDate    time.Time
-	ShiftID      int
-	EmpID        int
-	UserCreateID int
-	Shift        Shift
-	Employee     Employee
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID             int
+	StartDate      time.Time
+	ShiftID        int
+	EmpID          int
+	UserCreateID   int
+	Shift          Shift
+	Employee       Employee
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	WdTypeId       int
+	WorkingDayType WorkingDayType
+}
+
+type WorkingDayType struct {
+	ID        int
+	Code      string
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // ROOM is the room model

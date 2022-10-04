@@ -55,3 +55,6 @@ VALUES(18, 'O', 'Obuka','2022-09-28 00:00:00.000', '2022-09-28 00:00:00.000');
 INSERT INTO public.working_day_types
 ( id, code, name,created_at, updated_at)
 VALUES(19, 'R', 'Rekreacija','2022-09-28 00:00:00.000', '2022-09-28 00:00:00.000');
+INSERT INTO public.working_day_types
+(id, code, "name", created_at, updated_at)
+VALUES(20, ' ', 'Ne radi', '2022-09-28 00:00:00.000', '2022-09-28 00:00:00.000');
