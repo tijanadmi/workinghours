@@ -35,7 +35,7 @@
        
         <div class="clearfix"></div>
 
-        <form method="post" action="/admin/reservations-calendar">
+        <form method="post" action="/admin/reservations-calendar-day-type">
             <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
             <input type="hidden" name="m" value="{{index .StringMap "this_month"}}">
             <input type="hidden" name="y" value="{{index .StringMap "this_month_year"}}">
@@ -46,34 +46,33 @@
             {{$reservations := index $.Data (printf "reservation_map_%d" .ID)}}
              
 
-            <h4 class="mt-4">{{.FirstName}} - {{.Workplace}} ({{.Address}}, {{.Phone}})</h4>
-
-            <div class="table-response-sm">
+            <h4 class="mt-4">{{.FirstName}} - {{.Workplace}} ({{.Address}}, {{.Phone}}) </h4>
+            
+            <div class="table-response-sm" style="overflow-x:scroll;">
                 <table class="table table-bordered table-sm">
 
                      <tr class="table-active">
-                     <td class="text-center">
-                     </td>
                             {{range $index := iterate $dim}}
-                                <td class="text-center">
+                                <td {{if eq (weekday (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0}}
+                                    class="table-danger text-center" 
+                                    {{end}}
+                                    class="text-center">
                                     {{add $index 1}}
                                 </td>
                             {{end}}
                      </tr>
                      <tr>
-                     <td class="text-center">
-                     Dnevna
-                     </td>
+                     
                         {{range $index := iterate $dim}}
                             
                                 <td class="text-center">
                                 
                                     <div id="divInnerCombo">
-                                        <select   class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id ="InnerCombo" onChange="refreshPage()"> 
+                                        <select   name="add_dayblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example" id ="InnerCombo" onChange="refreshPage()" style="width:auto;"> 
 			                           
                                         {{range $workingDayTypeList}}
                                             <option {{if eq .ID (index $dayblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) }}
-                                                selected="selected"
+                                                selected="selected"                                                
                                                 {{end}}     
                                             value="{{.ID }}">
                                                 {{.Code}}</option>
@@ -85,26 +84,7 @@
                                 </td>
                        
                      </tr>
-                     <tr>
-                     <td class="text-center">
-                     Noćna
-                     </td>
-                        {{range $index := iterate $dim}}
-                                <td class="text-center">
-                                <input 
-                                    {{if gt (index $nightblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0 }}
-                                                    checked
-                                                    name="remove_nightblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
-                                                    value="{{index $nightblocks (printf "%s-%s-%d" $curYear $curMonth (add $index 1))}}"
-                                                {{else}}
-                                                    name="add_nightblock_{{$employeeID}}_{{printf "%s-%s-%d" $curYear $curMonth (add $index 1)}}"
-                                                    value="1"
-                                                {{end}}
-                                                type="checkbox">
-                                 {{end}}
-                                </td>
-                        
-                     </tr>
+                     
 
                 </table>
             </div>

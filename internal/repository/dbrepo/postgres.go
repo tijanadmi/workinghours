@@ -612,13 +612,13 @@ func (m *postgresDBRepo) GetReservationTypeForEmpByDate(empID int, start, end ti
 func (m *postgresDBRepo) InsertReservationDayTypeForEmp(wd_type_id int, emp_id int, user_create_id int, startDate time.Time) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	query := `delete from emp_days_reservations where wd_type_id = $1 and emp_id = $2 and startDate = $3`
+	/*query := `delete from emp_days_reservations where wd_type_id = $1 and emp_id = $2 and startDate = $3`
 
 	_, err := m.DB.ExecContext(ctx, query, wd_type_id, emp_id, startDate)
 	if err != nil {
 		log.Println(err)
 		return err
-	}
+	}*/
 	query2 := `insert into emp_days_reservations (start_date, shift_id, emp_id, user_create_id,
 			created_at, updated_at, wd_type_id) values ($1, $2, $3, $4, $5, $6, $7)`
 	log.Println(wd_type_id)
@@ -630,11 +630,26 @@ func (m *postgresDBRepo) InsertReservationDayTypeForEmp(wd_type_id int, emp_id i
 		shift_id = 1
 	}
 	if wd_type_id != 20 {
-	_, err = m.DB.ExecContext(ctx, query2, startDate, shift_id, emp_id, user_create_id, time.Now(), time.Now(), wd_type_id)
+		_, err := m.DB.ExecContext(ctx, query2, startDate, shift_id, emp_id, user_create_id, time.Now(), time.Now(), wd_type_id)
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+	return nil
+}
+
+// DeleteEmpDayByID deletes a emp day reservation
+func (m *postgresDBRepo) DeleteEmpDayTypeByID(wd_type_id int, emp_id int, user_create_id int, startDate time.Time) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `delete from emp_days_reservations where wd_type_id = $1 and emp_id = $2 and start_date = $3`
+
+	_, err := m.DB.ExecContext(ctx, query, wd_type_id, emp_id, startDate)
 	if err != nil {
 		log.Println(err)
 		return err
-	}
 	}
 	return nil
 }

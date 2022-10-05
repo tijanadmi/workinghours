@@ -17,10 +17,11 @@ import (
 var functions = template.FuncMap{
 	"humanDate":  HumanDate,
 	"formatDate": FormatDate,
+	"weekday":    WeekdayFun,
 	"iterate":    Iterate,
-	"iterate2":    Iterate2,
+	"iterate2":   Iterate2,
 	"add":        Add,
-	"minus": Minus,
+	"minus":      Minus,
 }
 
 var app *config.AppConfig
@@ -44,7 +45,7 @@ func Iterate(count int) []int {
 }
 
 // Iterate returns a slice of ints, starting at a, going to count
-func Iterate2(a,count int) []int {
+func Iterate2(a, count int) []int {
 	var i int
 	var items []int
 	for i = a; i < count; i++ {
@@ -65,6 +66,16 @@ func HumanDate(t time.Time) string {
 
 func FormatDate(t time.Time, f string) string {
 	return t.Format(f)
+}
+func WeekdayFun(t string) int {
+	fmt.Println("usao")
+	t1, err := time.Parse("2006-01-2", t)
+	if err != nil {
+		fmt.Println(err)
+	}
+	weekday := t1.Weekday()
+	fmt.Println(weekday)
+	return int(weekday)
 }
 
 func AddDefaultData(td *models.TemplateData, r *http.Request) *models.TemplateData {

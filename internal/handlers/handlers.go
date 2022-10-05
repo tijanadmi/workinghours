@@ -355,7 +355,7 @@ func (m *Repository) AdminReservationsCalendarByDayType(w http.ResponseWriter, r
 		month, _ := strconv.Atoi(r.URL.Query().Get("m"))
 		now = time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC) //variable that contains year, month, 1-any day in that month, 0-hour, 0-minute, 0-second, 0-nanosecond, time.UTC - location
 	}
-
+	
 	data := make(map[string]interface{})
 	data["now"] = now
 
@@ -443,8 +443,8 @@ func (m *Repository) AdminReservationsCalendarByDayType(w http.ResponseWriter, r
 			// it's a block
 			blockMap[y.StartDate.Format("2006-01-2")] = y.WdTypeId
 			dayblockMap[y.StartDate.Format("2006-01-2")] = y.WdTypeId
-			fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, dayblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-			fmt.Println()
+			//fmt.Printf("EMP_ID=%d, Blocked value=%d For day=%s ", x.ID, dayblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
+			//fmt.Println()
 
 		}
 
@@ -460,8 +460,8 @@ func (m *Repository) AdminReservationsCalendarByDayType(w http.ResponseWriter, r
 			// it's a block
 
 			nightblockMap[y.StartDate.Format("2006-01-2")] = y.ID
-			fmt.Printf("EMP_ID=%d, Blocked value=%d For night=%s ", x.ID, nightblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
-			fmt.Println()
+			//fmt.Printf("EMP_ID=%d, Blocked value=%d For night=%s ", x.ID, nightblockMap[y.StartDate.Format("2006-01-2")], y.StartDate.Format("2006-01-2"))
+			//fmt.Println()
 
 		}
 		data[fmt.Sprintf("reservation_map_%d", x.ID)] = reservationMap
@@ -479,6 +479,101 @@ func (m *Repository) AdminReservationsCalendarByDayType(w http.ResponseWriter, r
 		Data:      data,
 		IntMap:    intMap,
 	})
+}
+
+// AdminPostReservationsCalendar handles post of reservation calendar
+func (m *Repository) AdminPostReservationsCalendarByDayType(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	year, _ := strconv.Atoi(r.Form.Get("y"))
+	month, _ := strconv.Atoi(r.Form.Get("m"))
+
+	/***** Get from Session Begin****/
+	user_id, ok := m.App.Session.Get(r.Context(), "user_id").(int)
+	if !ok {
+		//log.Println("cannot get item from session")
+		m.App.ErrorLog.Println("Can't get  user_id from session")
+		m.App.Session.Put(r.Context(), "error", "Can't get   from session")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	/***** Get from Session End****/
+	// process blocks
+	employee, err := m.DB.GetEmployeeByUserIDCRUD(user_id)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+
+	for _, x := range employee {
+		// Get the block map from the session. Loop through entire map, if we have an entry in the map
+		// that does not exist in our posted data, and if the restriction id > 0, then it is a block we need to
+		// remove.
+		curMap := m.App.Session.Get(r.Context(), fmt.Sprintf("day_block_map_%d", x.ID)).(map[string]int)
+		for name, value := range curMap {
+
+			// ok will be false if the value is not in the map
+			if val, ok := curMap[name]; ok {
+				// only pay attention to values > 0, and that are not in the form post
+				// the rest are just placeholders for days without blocks
+				//fmt.Println(val)
+				if val == 20 && value != 0 {
+					fmt.Println("remove_dayblock")
+					if !form.Has(fmt.Sprintf("remove_dayblock_%d_%s", x.ID, name), r) {
+						// delete the restriction by id
+						fmt.Println("remove_dayblock")
+						/*err := m.DB.DeleteEmpDayByID(value)
+						if err != nil {
+							log.Println(err)
+						}*/
+					}
+				}
+			}
+		}
+	}
+
+	// now handle new blocks
+	for name, _ := range r.PostForm {
+		//fmt.Println(r.Form.Get(name))
+		if strings.HasPrefix(name, "add_dayblock") {
+
+			exploded := strings.Split(name, "_")
+			employeeID, _ := strconv.Atoi(exploded[2])
+			t, _ := time.Parse("2006-01-2", exploded[3])
+			v, _ := strconv.Atoi(r.Form.Get(name))
+			if v != 0 {
+				curMap := m.App.Session.Get(r.Context(), fmt.Sprintf("day_block_map_%d", employeeID)).(map[string]int)
+				if v != 20 && v != 0 && curMap[t.Format("2006-01-2")] != v {
+					fmt.Printf("EMP_ID=%d, Blocked value=%d For night=%s ", employeeID, v, t)
+					fmt.Println()
+					// insert a new reservation
+					err := m.DB.InsertReservationDayTypeForEmp(v, employeeID, user_id, t)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+
+				if v == 20 && curMap[t.Format("2006-01-2")] != 0 {
+					//delete reservation
+					fmt.Printf("EMP_ID=%d, Del value=%d For night=%s ", employeeID, v, t)
+					fmt.Println()
+					err := m.DB.DeleteEmpDayTypeByID(curMap[t.Format("2006-01-2")], employeeID, user_id, t)
+					if err != nil {
+						log.Println(err)
+					}
+				}
+			}
+		}
+	}
+
+	m.App.Session.Put(r.Context(), "flash", "Izmene su sačuvane!")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar-day-type?y=%d&m=%d", year, month), http.StatusSeeOther)
 }
 
 // AdminReservationsCalendar displays the reservation calendar

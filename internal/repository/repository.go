@@ -28,4 +28,5 @@ type DatabaseRepo interface {
 	InsertReservationDayForEmp(shift_id int, emp_id int, user_create_id int, startDate time.Time) error
 	InsertReservationDayTypeForEmp(wd_type_id int, emp_id int, user_create_id int, startDate time.Time) error
 	DeleteEmpDayByID(id int) error
+	DeleteEmpDayTypeByID(wd_type_id int, emp_id int, user_create_id int, startDate time.Time) error
 }
