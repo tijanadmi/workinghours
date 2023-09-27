@@ -7,4 +7,4 @@ This is the repository for review and updating of the dispatcher's working hours
 - Uses the [chi router](https://github.com/go-chi/chi)
 - Uses [alex edwards SCS](https://github.com/alexedwards/scs/v2) session manager
 - Uses [no surf](https://github.com/justinas/nosurf)
-- Uses [PostgreSQL driver](https://github.com/jackc/pgx)
+- Uses [pgx PostgreSQL driver](https://github.com/jackc/pgx)
