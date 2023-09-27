@@ -53,7 +53,7 @@
 
                      <tr class="table-active">
                             {{range $index := iterate $dim}}
-                                <td {{if eq (weekday (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0}}
+                                <td {{if or (eq (weekday (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 0)  (eq (weekday (printf "%s-%s-%d" $curYear $curMonth (add $index 1))) 6)}}
                                     class="table-danger text-center" 
                                     {{end}}
                                     class="text-center">
